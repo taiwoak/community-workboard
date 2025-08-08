@@ -22,7 +22,7 @@ import { join } from 'path';
       }),
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // This is where React is built
+      rootPath: join(__dirname, '..', 'public'),
     }),
     AuthModule,
     TasksModule,
