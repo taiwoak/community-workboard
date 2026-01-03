@@ -37,11 +37,9 @@ export class TasksService {
                 title: task.title,
                 description: task.description,
                 createdAt: task.createdAt,
-                createdBy: {
-                    id: createdBy._id.toString(),
-                    name: createdBy.name,
-                    email: createdBy.email,
-                },
+                createdBy: createdBy
+                    ? { id: createdBy._id.toString(), name: createdBy.name, email: createdBy.email }
+                    : { id: null, name: 'Contributor', email: '' },
             };
         });
     }
