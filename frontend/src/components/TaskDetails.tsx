@@ -29,6 +29,7 @@ const TaskDetails = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,6 +58,7 @@ const TaskDetails = () => {
 
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       await axiosInstance.post(`/tasks/${id}/apply`, { message });
       setMessage('');
@@ -64,6 +66,8 @@ const TaskDetails = () => {
     } catch (error: any) {
       const errMsg = error?.response?.data?.message || "Application failed";
       alert(errMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,9 +112,14 @@ const TaskDetails = () => {
                 />
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                  disabled={isLoading}
+                  className={`px-6 py-2 rounded-lg font-medium
+                    ${isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"}
+                  `}
                 >
-                  Submit Application
+                  {isLoading ? "Submitting..." : "Submit Application"}
                 </button>
               </form>
             </div>
