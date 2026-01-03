@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axios";
 
 const RegisterForm = () => {
@@ -11,9 +11,11 @@ const RegisterForm = () => {
   });
 
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!form.role) {
       alert("Please select a role");
@@ -27,6 +29,8 @@ const RegisterForm = () => {
     } catch (error: any) {
       const errMsg = error?.response?.data?.message || "Registration failed";
       alert(errMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,10 +81,25 @@ const RegisterForm = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          disabled={isLoading}
+          className={`w-full py-3 rounded-lg font-semibold transition-colors
+            ${isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"}
+          `}
         >
-          Register
+          {isLoading ? "Registering..." : "Register"}
         </button>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Login
+          </Link>
+        </p>
       </form>
     </div>
   );

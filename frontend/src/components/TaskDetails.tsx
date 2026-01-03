@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import axiosInstance from "../utils/axios";
 
 type Application = {
@@ -67,6 +67,15 @@ const TaskDetails = () => {
     }
   };
 
+  const BackToDashboard = () => (
+    <Link
+      to="/dashboard"
+      className="flex items-center gap-1 text-sm text-gray-800 hover:text-blue-600 transition cursor-pointer"
+    >
+      ← Back
+    </Link>
+  );
+
   if (loading || !task || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -82,7 +91,12 @@ const TaskDetails = () => {
         {user.role === 'volunteer' && (
           <>
             <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 text-blue-700">Apply to this task</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-blue-700">
+                  Apply to this task
+                </h3>
+                <BackToDashboard />
+              </div>
               <form onSubmit={handleApply} className="space-y-4">
                 <textarea
                   value={message}
@@ -105,7 +119,12 @@ const TaskDetails = () => {
 
         {user.role === 'contributor' && (
           <>
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Applications</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Applications
+              </h3>
+              <BackToDashboard />
+            </div>
             {applications.length === 0 ? (
               <p className="text-gray-500">No one has applied yet.</p>
             ) : (

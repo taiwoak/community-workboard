@@ -1,20 +1,24 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axios";
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const res = await axiosInstance.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.access_token);
       navigate('/dashboard');
     } catch (err) {
       alert('Invalid credentials');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,10 +50,25 @@ const LoginForm = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          disabled={isLoading}
+          className={`w-full py-3 rounded-lg font-semibold transition-colors
+            ${isLoading 
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"}
+          `}
         >
-          Login
+          {isLoading ? "Logging in..." : "Login"}
         </button>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
       </form>
     </div>
   );
