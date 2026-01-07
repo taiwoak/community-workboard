@@ -10,6 +10,7 @@ function App() {
 
   return <Router>
     <Routes>
+      <Route path="/index.html" element={<Navigate to="/" replace />} /> // fix for render deployment issue
       <Route path="/" element={<Navigate to="/login" />}/>
       <Route path="/login" element={<Login />}/>
       <Route path="/register" element={<Register />}/>
