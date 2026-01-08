@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axios";
 
@@ -19,6 +19,30 @@ const LoginForm = () => {
       alert('Invalid credentials');
     } finally {
       setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    window.google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: handleGoogleLogin,
+    });
+
+    window.google.accounts.id.renderButton(
+      document.getElementById("google-btn"),
+      { theme: "outline", size: "large", width: "100%" }
+    );
+  }, []);
+
+  const handleGoogleLogin = async (response: any) => {
+    try {
+      const res = await axiosInstance.post('/auth/google', {
+        idToken: response.credential,
+      });
+
+      localStorage.setItem('token', res.data.access_token);
+      navigate('/dashboard');
+    } catch (err) {
+      alert('Google login failed');
     }
   };
 
@@ -59,6 +83,15 @@ const LoginForm = () => {
         >
           {isLoading ? "Logging in..." : "Login"}
         </button>
+
+        <div className="my-6 flex items-center gap-2">
+          <div className="flex-grow h-px bg-gray-300" />
+          <span className="text-sm text-gray-500">OR</span>
+          <div className="flex-grow h-px bg-gray-300" />
+        </div>
+
+        <div id="google-btn" className="flex justify-center" />
+
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{" "}

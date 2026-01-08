@@ -5,10 +5,20 @@ import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { Types } from 'mongoose';
+import { OAuth2Client } from 'google-auth-library';
+import { ConfigService } from '@nestjs/config';
+import { GoogleAuthDto } from './dto/google-auth.dto';
+import { UserRole } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class AuthService {
-    constructor(private usersService: UsersService, private jwtService: JwtService) {}
+    private googleClient: OAuth2Client;
+    constructor(private usersService: UsersService, private jwtService: JwtService, private configService: ConfigService,
+  ) {
+    this.googleClient = new OAuth2Client(
+      this.configService.get('GOOGLE_CLIENT_ID'),
+    );
+  }
 
     async register(registerDto: RegisterDto) {
         const { email, password } = registerDto
@@ -60,4 +70,35 @@ export class AuthService {
         delete userInfo._id;
         return userInfo;
     }
+
+    async googleAuth(dto: GoogleAuthDto) {
+    const ticket = await this.googleClient.verifyIdToken({
+        idToken: dto.idToken,
+        audience: this.configService.get('GOOGLE_CLIENT_ID'),
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+        throw new UnauthorizedException('Invalid Google token');
+    }
+
+    const email = payload.email.toLowerCase();
+
+    // Try to find existing user
+    let user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+        // New user → create account
+        user = await this.usersService.create({
+        email,
+        name: payload.name || 'No Name',        // blank / null password for Google OAuth
+        password: '',
+        role: UserRole.Volunteer, // Default role
+        });
+    }
+
+    // Generate JWT for the user (existing or new)
+    return this.generateToken(user);
+    }
+
 }
